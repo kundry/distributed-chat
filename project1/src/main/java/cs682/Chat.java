@@ -4,22 +4,25 @@ import java.util.Scanner;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.zookeeper.*;
-import org.apache.zookeeper.data.Stat;
 import cs682.ChatMessages.ZKData;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.net.*;
+
 
 public class Chat {
 
     public static final int PORT = 9000;
     public static final String HOST = "localhost";
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         String fullCommand, command;
         String group = "/CS682_Test"; // String group = "/zkdemo";
         String member = "/kyrivero";
+        //InetAddress localhost = InetAddress.getLocalHost();
+        //String myIP = localhost.getHostAddress();
         byte[] data = createZKData("localhost","9000");
 
         System.out.println("Welcome to Chat Peer!");
@@ -27,11 +30,13 @@ public class Chat {
         //System.out.println("Insert PORT: ");
         //System.out.println("Insert HOST NAME: ");
 
-        //Connecting Joining
+        //Connecting and Joining
         ZooKeeper zk = connectToZK();
         joinGroup(zk, group, member, data);
 
         // UI
+        String currentThreadId = String.valueOf(Thread.currentThread().getId());
+        System.out.println("Main Thread: " + currentThreadId);
         System.out.print("Enter a command: ");
         fullCommand = input.nextLine();
         System.out.println("Received: " + fullCommand);
@@ -46,6 +51,13 @@ public class Chat {
                 System.out.println("Send");
                 System.out.println(arg[1]);
                 System.out.println(arg[2]);
+                String name = arg[1];
+                String message = arg[2];
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() { new Sender().prepareMessage(group, name, message, false);
+                    }
+                }).start();
                 break;
             default:
                 break;
@@ -53,19 +65,26 @@ public class Chat {
 
     }//main
 
-    public static ZooKeeper connectToZK() throws IOException, InterruptedException {
+    public static ZooKeeper connectToZK() {
         final CountDownLatch connectedSignal = new CountDownLatch(1);
-        ZooKeeper zk = new ZooKeeper(HOST + ":" + PORT, 1000, new Watcher() {
-            @Override
-            public void process(WatchedEvent event) {
-                if (event.getState() == Watcher.Event.KeeperState.SyncConnected) {
-                    connectedSignal.countDown();
+        ZooKeeper zk = null;
+        try {
+            zk = new ZooKeeper(HOST + ":" + PORT, 1000, new Watcher() {
+                @Override
+                public void process(WatchedEvent event) {
+                    if (event.getState() == Watcher.Event.KeeperState.SyncConnected) {
+                        connectedSignal.countDown();
+                    }
                 }
-            }
-        });
-        System.out.println("Connecting...");
-        connectedSignal.await();
-        System.out.println("Connected");
+            });
+            System.out.println("Connecting...");
+            connectedSignal.await();
+            System.out.println("Connected");
+        } catch(InterruptedException ie){
+            System.out.println("Unable connect to ZooKeeper" + ie );
+        } catch (IOException ioe){
+            System.out.println("Unable connect to ZooKeeper IOException " + ioe);
+        }
         return zk;
     }
 
@@ -74,8 +93,7 @@ public class Chat {
                 .setIp(ip)
                 .setPort(port)
                 .build();
-        byte[] zkDataObj = regInfo.toByteArray();
-        return zkDataObj;
+        return regInfo.toByteArray();
     }
 
     public static void joinGroup(ZooKeeper zk, String group, String member, byte[] data){
