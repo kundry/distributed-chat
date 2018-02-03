@@ -30,7 +30,7 @@ public class Sender {
                 ZKData  receiverInfo = ZKData.parseFrom(raw);
                 InetAddress receiverIp = InetAddress.getByName(receiverInfo.getIp());
                 int receiverPort = Integer.parseInt(receiverInfo.getPort());
-                cs682.ChatMessages.Chat chatMessage = createChatMessage(receiverName, message, isBcast);
+                ChatMessages.Chat chatMessage = createChatMessage(receiverName, message, isBcast);
                 System.out.println("IP: " +receiverIp +" Port: "+ receiverPort + " Message: "+ chatMessage.toString());
                 System.out.println(receiverInfo.getIp());
                 transferMessage(receiverIp, receiverPort, chatMessage);
@@ -49,8 +49,8 @@ public class Sender {
         }
     } // prepareMessage
 
-    private cs682.ChatMessages.Chat createChatMessage(String receiver, String message, boolean isBcast){
-        cs682.ChatMessages.Chat chatMessage = cs682.ChatMessages.Chat.newBuilder()
+    private ChatMessages.Chat createChatMessage(String receiver, String message, boolean isBcast){
+        ChatMessages.Chat chatMessage = ChatMessages.Chat.newBuilder()
                 .setFrom(receiver)
                 .setMessage(message)
                 .setIsBcast(isBcast)
@@ -58,7 +58,7 @@ public class Sender {
         return chatMessage;
     }
 
-    private void transferMessage(InetAddress ip, int port,  cs682.ChatMessages.Chat chatMessage){
+    private void transferMessage(InetAddress ip, int port,  ChatMessages.Chat chatMessage){
         try (
                 Socket senderSock = new Socket(ip,port);
                 OutputStream outStream = senderSock.getOutputStream();

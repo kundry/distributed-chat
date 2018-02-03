@@ -29,7 +29,15 @@ public class Chat {
         //System.out.println("Insert PORT: ");
         //System.out.println("Insert HOST NAME: ");
 
-        //Connecting and Joining
+        //Start Listening
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new Receiver().startListening();
+            }
+        }).start();
+
+        //Registering
         ZooKeeper zk = connectToZK();
         joinGroup(zk, group, member, data);
 
