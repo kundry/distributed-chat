@@ -2,15 +2,20 @@ package cs682;
 
 import cs682.ChatMessages.Chat;
 import cs682.ChatMessages.ZKData;
+import cs682.ChatMessages.Reply;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 
 public class Sender {
-    //kyrivero0000000475
-
 
     public void prepareMessage(String group, String receiverName, String message, boolean isBcast){
         String currentThreadId = String.valueOf(Thread.currentThread().getId());
@@ -23,11 +28,12 @@ public class Sender {
             byte[] raw = zk.getData(group + "/" + receiverName, false, s);
             if(raw != null) {
                 ZKData  receiverInfo = ZKData.parseFrom(raw);
-                String receiverIp = receiverInfo.getIp();
-                String receiverPort = receiverInfo.getPort();
-                byte[] chatMessage = createChatMessage(receiverName, message, isBcast);
+                InetAddress receiverIp = InetAddress.getByName(receiverInfo.getIp());
+                int receiverPort = Integer.parseInt(receiverInfo.getPort());
+                cs682.ChatMessages.Chat chatMessage = createChatMessage(receiverName, message, isBcast);
                 System.out.println("IP: " +receiverIp +" Port: "+ receiverPort + " Message: "+ chatMessage.toString());
-                
+                System.out.println(receiverInfo.getIp());
+                transferMessage(receiverIp, receiverPort, chatMessage);
 
             } else {
                 System.out.println("Receiver not found");
@@ -38,16 +44,34 @@ public class Sender {
             System.out.println("Not able to fetch receiver data KeeperException" + ke);
         } catch (InvalidProtocolBufferException ipbe){
             System.out.println("Not able to fetch receiver data InvalidProtocolBufferException" + ipbe);
+        } catch (UnknownHostException uhe){
+            System.out.println("Not able to fetch receiver data UnknownHostException" + uhe);
         }
     } // prepareMessage
 
-    private byte[] createChatMessage(String receiver, String message, boolean isBcast){
-        cs682.ChatMessages.Chat content = cs682.ChatMessages.Chat.newBuilder()
+    private cs682.ChatMessages.Chat createChatMessage(String receiver, String message, boolean isBcast){
+        cs682.ChatMessages.Chat chatMessage = cs682.ChatMessages.Chat.newBuilder()
                 .setFrom(receiver)
                 .setMessage(message)
                 .setIsBcast(isBcast)
                 .build();
-        return content.toByteArray();
+        return chatMessage;
+    }
+
+    private void transferMessage(InetAddress ip, int port,  cs682.ChatMessages.Chat chatMessage){
+        try (
+                Socket senderSock = new Socket(ip,port);
+                OutputStream outStream = senderSock.getOutputStream();
+                InputStream inStream = senderSock.getInputStream();
+        ) {
+            chatMessage.writeDelimitedTo(outStream);
+            Reply receiverReply = Reply.getDefaultInstance();
+            receiverReply = receiverReply.parseDelimitedFrom(inStream);
+            System.out.println("Reply: " + receiverReply);
+
+        }catch(IOException io){
+            System.out.println("Unable to transfer the message" + io);
+        }
     }
 
 }

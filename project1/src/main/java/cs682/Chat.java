@@ -21,9 +21,8 @@ public class Chat {
         String fullCommand, command;
         String group = "/CS682_Test"; // String group = "/zkdemo";
         String member = "/kyrivero";
-        //InetAddress localhost = InetAddress.getLocalHost();
-        //String myIP = localhost.getHostAddress();
-        byte[] data = createZKData("localhost","9000");
+        String myIP = getLocalHostIp();
+        ZKData data = createZKData(myIP,"9000");
 
         System.out.println("Welcome to Chat Peer!");
         //Commands:  list, send, sendAll, get, help, exit
@@ -88,18 +87,18 @@ public class Chat {
         return zk;
     }
 
-    public static byte[] createZKData(String ip, String port) {
+    public static ZKData createZKData(String ip, String port) {
         ZKData regInfo = ZKData.newBuilder()
                 .setIp(ip)
                 .setPort(port)
                 .build();
-        return regInfo.toByteArray();
+        return regInfo;
     }
 
-    public static void joinGroup(ZooKeeper zk, String group, String member, byte[] data){
+    public static void joinGroup(ZooKeeper zk, String group, String member, ZKData data){
         try {
             String createdPath = zk.create(group + member,
-                    data,  //ip and port
+                    data.toByteArray(),  //ip and port
                     ZooDefs.Ids.OPEN_ACL_UNSAFE,
                     CreateMode.PERSISTENT_SEQUENTIAL);
             System.out.println("Joined group " + group + member);
@@ -139,6 +138,17 @@ public class Chat {
 //        catch(InvalidProtocolBufferException ipbe){
 //            System.out.println("Unable to list members of the group: InvalidProtocolBufferException");
 //        }
+    }
+
+    private static String getLocalHostIp(){
+        String myIp = "";
+        try{
+            InetAddress localhost = InetAddress.getLocalHost();
+            myIp = localhost.getHostAddress();
+        } catch( UnknownHostException uhe) {
+            System.out.println("Unable to get the local IP Address" + uhe);
+        }
+        return myIp;
     }
 
 }//Chat
