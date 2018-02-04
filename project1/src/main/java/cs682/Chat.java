@@ -1,6 +1,8 @@
 package cs682;
 
 import java.util.*;
+
+import org.apache.yetus.audience.InterfaceAudience;
 import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.*;
 import cs682.ChatMessages.ZKData;
@@ -13,7 +15,8 @@ public class Chat {
 
     public static final int PORT = 9000;
     public static final String HOST = "localhost";
-    public static final ArrayList<String> CHAT_COMMANDS = new ArrayList<String>();
+    private static final ArrayList<String> CHAT_COMMANDS = new ArrayList<String>();
+    private static boolean RUNNING = true;
 
     public static void main(String[] args) {
         //Setting available commands
@@ -24,7 +27,7 @@ public class Chat {
         CHAT_COMMANDS.add("exit");
 
         //Getting args
-        String member ="";
+        String member;
         String port = "";
 
         if(!args[0].equals("-user") || !args[2].equals("-port") ){
@@ -59,7 +62,7 @@ public class Chat {
         String currentThreadId = String.valueOf(Thread.currentThread().getId());
         System.out.println("Main Thread: " + currentThreadId);
 
-        while(true) {
+        while(RUNNING) {
             System.out.print("Enter a command: ");
             fullCommand = input.nextLine();
             System.out.println("Received: " + fullCommand);
@@ -85,6 +88,9 @@ public class Chat {
                                 new Sender().prepareMessage(group, name, message, false);
                             }
                         }).start();
+                        break;
+                    case "exit":
+                        RUNNING = false;
                         break;
                     default:
                         break;
