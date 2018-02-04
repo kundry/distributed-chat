@@ -39,7 +39,7 @@ public class Chat {
 
         //Registering
         ZooKeeper zk = connectToZK();
-        joinGroup(zk, group, member, data);
+        //joinGroup(zk, group, member, data);
 
         // UI
         String currentThreadId = String.valueOf(Thread.currentThread().getId());
@@ -123,7 +123,11 @@ public class Chat {
         try {
             List<String> children = zk.getChildren(group, false);
             System.out.println(group + " group has the following members: ");
+            System.out.println(children.size());
+            int i =0;
             for(String child: children) {
+                i = i+1;
+                System.out.println(i);
                 System.out.println("Node: "+ child);
 //                Stat s = new Stat();
 //                byte[] raw = zk.getData(group + "/" + child, false, s);

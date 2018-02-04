@@ -41,9 +41,22 @@ public class Receiver {
             ){
                 ChatMessages.Chat upcommingMssg = ChatMessages.Chat.parseDelimitedFrom(inStream);
                 //Parse the message and show it
+                String from = upcommingMssg.getFrom();
+                String message = upcommingMssg.getMessage();
+                boolean is_bcast = upcommingMssg.getIsBcast();
 
-                // send reply Fix Parameters
+                if(!is_bcast) {
+                    System.out.println("The following message was received: ");
+                    System.out.println(message);
+                    System.out.println("by " + from);
+                } else {
+                    //broadcast
+                }
+
+                // send reply Fix Parameters and create a method
                 Reply reply = createReply(200,"OK");
+                reply.writeDelimitedTo(outstream);
+                connectionSock.close();
 
             }catch(IOException ie){
                 System.out.println("Unable to communicate with the sender" + ie);
