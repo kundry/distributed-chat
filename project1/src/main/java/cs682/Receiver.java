@@ -15,6 +15,8 @@ public class Receiver {
 
     public void startListening(){
         final ExecutorService threads = Executors.newFixedThreadPool(10);
+        String currentThreadId = String.valueOf(Thread.currentThread().getId());
+        System.out.println("Thread in Receiver: " + currentThreadId);
         try (
                 ServerSocket receiverServer = new ServerSocket(PORT);
         ){
