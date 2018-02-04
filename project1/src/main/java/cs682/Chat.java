@@ -2,7 +2,6 @@ package cs682;
 
 import java.util.*;
 import org.apache.zookeeper.data.Stat;
-import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.zookeeper.*;
 import cs682.ChatMessages.ZKData;
 import java.io.IOException;
@@ -17,25 +16,28 @@ public class Chat {
     public static final ArrayList<String> CHAT_COMMANDS = new ArrayList<String>();
 
     public static void main(String[] args) {
-
+        //Setting available commands
         CHAT_COMMANDS.add("list");
         CHAT_COMMANDS.add("send");
         CHAT_COMMANDS.add("sendAll");
-        //CHAT_COMMANDS.add("get");
         CHAT_COMMANDS.add("help");
         CHAT_COMMANDS.add("exit");
 
-        Scanner input = new Scanner(System.in);
-        String fullCommand, command;
+        //Getting args
+        String member ="";
+        String port = "";
+
+        if(!args[0].equals("-user") || !args[2].equals("-port") ){
+            System.out.println("Invalid execution arguments");
+        } else {
+          member = "/" + args[1];
+          port = args[3];
+          System.out.println("Member: " + member);
+          System.out.println("Port: " + port);
+        }
         String group = "/CS682_Test"; // String group = "/zkdemo";
-        String member = "/hey"; //taken from args user kyrivero
-        String port = "9007"; // taken from args port
         String myIP = getLocalHostIp();
         ZKData data = createZKData(myIP,port);
-
-        System.out.println("Welcome to Chat Peer!");
-
-        //Getting user and port from the args
 
 
         //Start Listening
@@ -48,9 +50,12 @@ public class Chat {
 
         //Registering
         ZooKeeper zk = connectToZK();
-        joinGroup(zk, group, member, data);
+        //joinGroup(zk, group, member, data);
 
         // UI
+        System.out.println("Welcome to Chat Peer!");
+        Scanner input = new Scanner(System.in);
+        String fullCommand, command;
         String currentThreadId = String.valueOf(Thread.currentThread().getId());
         System.out.println("Main Thread: " + currentThreadId);
 
@@ -146,12 +151,6 @@ public class Chat {
                 if(raw != null) {
                     String nodeInfo = new String(raw);
                     System.out.println(nodeInfo);
-//                    ZKData nodeInfo = ZKData.parseFrom(raw);
-//                    String nodeIp = nodeInfo.getIp();
-//                    String nodePort = nodeInfo.getPort();
-//                    System.out.println("Ip: "+ nodeIp);
-//                    System.out.println("Port: "+ nodePort);
-//                    System.out.printf("\n");
                 } else {
                     System.out.println("\tNO DATA");
                 }
@@ -161,9 +160,6 @@ public class Chat {
         }catch(InterruptedException ie){
             System.out.println("Unable to list members of the group: InterruptedException ");
         }
-//        catch(InvalidProtocolBufferException ipbe){
-//            System.out.println("Unable to list members of the group: InvalidProtocolBufferException");
-//        }
     }
 
     private static String getLocalHostIp(){
