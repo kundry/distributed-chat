@@ -70,7 +70,7 @@ public class Chat {
         while(RUNNING) {
             System.out.print("Enter a command: ");
             fullCommand = input.nextLine();
-            System.out.println("Received: " + fullCommand);
+            //System.out.println("Received: " + fullCommand);
             String[] fullCommandSplit = fullCommand.split("\\s");
             command = fullCommandSplit[0];
 
@@ -123,7 +123,17 @@ public class Chat {
                         break;
 
                     case "exit":
+                        System.out.println("Exiting ....");
                         RUNNING = false;
+                        System.exit(0);
+                        break;
+
+                    case "help":
+                        System.out.println("list");
+                        System.out.println("send [name] [message]");
+                        System.out.println("sendAll [message]");
+                        System.out.println("help");
+                        System.out.println("exit");
                         break;
                     default:
                         break;
