@@ -1,12 +1,10 @@
 package cs682;
 
-import cs682.ChatMessages.Chat.*;
 import cs682.ChatMessages.ZKData;
 import cs682.ChatMessages.Reply;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
 import com.google.protobuf.InvalidProtocolBufferException;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -14,11 +12,11 @@ import java.net.UnknownHostException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-
 public class Sender {
 
     public void prepareMessage( String receiverName, String message, boolean isBcast){
         String group = ZkeeperHandler.GROUP;
+        String member = ZkeeperHandler.MEMBER;
         String currentThreadId = String.valueOf(Thread.currentThread().getId());
         System.out.println("Finding receiver info");
         System.out.println(receiverName +" / " + message + " / " + group);
@@ -31,11 +29,9 @@ public class Sender {
                 ZKData  receiverInfo = ZKData.parseFrom(raw);
                 InetAddress receiverIp = InetAddress.getByName(receiverInfo.getIp());
                 int receiverPort = Integer.parseInt(receiverInfo.getPort());
-                ChatMessages.Chat chatMessage = createChatMessage(receiverName, message, isBcast);
+                ChatMessages.Chat chatMessage = createChatMessage(member, message, isBcast);
                 System.out.println("IP: " +receiverIp +" Port: "+ receiverPort + " Message: "+ chatMessage.toString());
-                //System.out.println(receiverInfo.getIp());
                 transferMessage(receiverIp, receiverPort, chatMessage);
-
             } else {
                 System.out.println("Receiver not found");
             }
