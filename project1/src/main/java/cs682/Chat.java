@@ -1,7 +1,6 @@
 package cs682;
 
 import java.util.*;
-
 import org.apache.yetus.audience.InterfaceAudience;
 import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.*;
@@ -9,7 +8,6 @@ import cs682.ChatMessages.ZKData;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.net.*;
-
 
 public class Chat {
 
@@ -27,9 +25,8 @@ public class Chat {
         CHAT_COMMANDS.add("exit");
 
         //Getting args
-        String member;
+        String member = "";
         String port = "";
-
         if(!args[0].equals("-user") || !args[2].equals("-port") ){
             System.out.println("Invalid execution arguments");
         } else {
@@ -38,10 +35,6 @@ public class Chat {
           System.out.println("Member: " + member);
           System.out.println("Port: " + port);
         }
-        String group = "/CS682_Test"; // String group = "/zkdemo";
-        String myIP = getLocalHostIp();
-        ZKData data = createZKData(myIP,port);
-
 
         //Start Listening
         new Thread(new Runnable() {
@@ -51,8 +44,17 @@ public class Chat {
             }
         }).start();
 
+        
         //Registering
-        ZooKeeper zk = connectToZK();
+        //String group = "/CS682_Test"; // String group = "/zkdemo";
+        ZkeeperHandler.MEMBER = member;
+        ZkeeperHandler.MEMBER_PORT = port;
+        ZooKeeper zk = getZkConnection();
+        ZkeeperHandler zkHandler = new ZkeeperHandler(zk);
+        zkHandler.joinGroup();
+
+        //String myIP = getLocalHostIp();
+        //ZKData data = createZKData(myIP,port);
         //joinGroup(zk, group, member, data);
 
         // UI
@@ -74,7 +76,8 @@ public class Chat {
             } else {
                 switch (command) {
                     case "list":
-                        listNodes(zk, group);
+                        //listNodes(zk, group);
+                        zkHandler.listNodes();
                         break;
                     case "send":
                         System.out.println("Send");
@@ -85,7 +88,7 @@ public class Chat {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                new Sender().prepareMessage(group, name, message, false);
+                                new Sender().prepareMessage(name, message, false);
                             }
                         }).start();
                         break;
@@ -99,7 +102,7 @@ public class Chat {
         }// end while
     }//main
 
-    public static ZooKeeper connectToZK() {
+    public static ZooKeeper getZkConnection() {
         final CountDownLatch connectedSignal = new CountDownLatch(1);
         ZooKeeper zk = null;
         try {
@@ -121,7 +124,7 @@ public class Chat {
         }
         return zk;
     }
-
+    /*
     public static ZKData createZKData(String ip, String port) {
         ZKData regInfo = ZKData.newBuilder()
                 .setIp(ip)
@@ -129,7 +132,8 @@ public class Chat {
                 .build();
         return regInfo;
     }
-
+    */
+    /*
     public static void joinGroup(ZooKeeper zk, String group, String member, ZKData data){
         try {
             String createdPath = zk.create(group + member,
@@ -145,7 +149,8 @@ public class Chat {
             System.out.println("Unable to join group " + group + " as " + member + "InterruptedException");
         }
     }
-
+    */
+    /*
     public static void listNodes(ZooKeeper zk, String group){
         try {
             List<String> children = zk.getChildren(group, false);
@@ -167,7 +172,8 @@ public class Chat {
             System.out.println("Unable to list members of the group: InterruptedException ");
         }
     }
-
+    */
+    /*
     private static String getLocalHostIp(){
         String myIp = "";
         try{
@@ -178,5 +184,6 @@ public class Chat {
         }
         return myIp;
     }
+    */
 
 }//Chat

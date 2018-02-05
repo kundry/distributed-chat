@@ -1,6 +1,6 @@
 package cs682;
 
-import cs682.ChatMessages.Chat;
+import cs682.ChatMessages.Chat.*;
 import cs682.ChatMessages.ZKData;
 import cs682.ChatMessages.Reply;
 import org.apache.zookeeper.*;
@@ -17,12 +17,13 @@ import java.io.OutputStream;
 
 public class Sender {
 
-    public void prepareMessage(String group, String receiverName, String message, boolean isBcast){
+    public void prepareMessage( String receiverName, String message, boolean isBcast){
+        String group = ZkeeperHandler.GROUP;
         String currentThreadId = String.valueOf(Thread.currentThread().getId());
         System.out.println("Finding receiver info");
         System.out.println(receiverName +" / " + message + " / " + group);
         System.out.println("Thread in Sender Finding Info: " + currentThreadId);
-        ZooKeeper zk = cs682.Chat.connectToZK();
+        ZooKeeper zk = Chat.getZkConnection();
         try {
             Stat s = new Stat();
             byte[] raw = zk.getData(group + "/" + receiverName, false, s);

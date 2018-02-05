@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 import cs682.ChatMessages.Reply;
 
 public class Receiver {
-    public static final int PORT = 9007;
+    public static final int PORT = 9007; //Fix this
     public static  boolean running = true;
 
     public void startListening(){
