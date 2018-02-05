@@ -8,6 +8,9 @@ import cs682.ChatMessages.ZKData;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.net.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Chat {
 
@@ -44,14 +47,14 @@ public class Chat {
             }
         }).start();
 
-        
+
         //Registering
         //String group = "/CS682_Test"; // String group = "/zkdemo";
         ZkeeperHandler.MEMBER = member;
         ZkeeperHandler.MEMBER_PORT = port;
         ZooKeeper zk = getZkConnection();
         ZkeeperHandler zkHandler = new ZkeeperHandler(zk);
-        zkHandler.joinGroup();
+        //zkHandler.joinGroup();
 
         //String myIP = getLocalHostIp();
         //ZKData data = createZKData(myIP,port);
@@ -80,18 +83,45 @@ public class Chat {
                         zkHandler.listNodes();
                         break;
                     case "send":
-                        System.out.println("Send");
-                        System.out.println(fullCommandSplit[1]);
-                        System.out.println(fullCommandSplit[2]);
+                        //System.out.println("Send");
+                        //System.out.println(fullCommandSplit[1]);
+                        //System.out.println(fullCommandSplit[2]);
                         String name = fullCommandSplit[1];
-                        String message = fullCommandSplit[2];
+                        StringBuilder message = new StringBuilder();
+                        message.append(fullCommandSplit[2]);
+                        if (fullCommandSplit.length > 3) {
+                            for (int i = 3; i < fullCommandSplit.length; i++) {
+                                message.append(" ").append(fullCommandSplit[i]);
+                            }
+                        }
+                        //String message = fullCommandSplit[2];
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                new Sender().prepareMessage(name, message, false);
+                                new Sender().prepareMessage(name, message.toString(), false);
                             }
                         }).start();
                         break;
+                    case "sendAll":
+                        StringBuilder bcastMessage = new StringBuilder();
+                        bcastMessage.append(fullCommandSplit[1]);
+                        if (fullCommandSplit.length > 2) {
+                            for (int i = 2; i < fullCommandSplit.length; i++) {
+                                bcastMessage.append(" ").append(fullCommandSplit[i]);
+                            }
+                        }
+                        ExecutorService bcastThreads = Executors.newFixedThreadPool(20);
+                        List<String> nodesNamesList = zkHandler.getNodesNameList();
+                        for(String node: nodesNamesList){
+                            bcastThreads.submit(new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    new Sender().prepareMessage(node, bcastMessage.toString(), true);
+                                }
+                            }));
+                        }
+                        break;
+
                     case "exit":
                         RUNNING = false;
                         break;

@@ -14,7 +14,7 @@ public class Receiver {
     public static  boolean running = true;
 
     public void startListening(){
-        final ExecutorService threads = Executors.newFixedThreadPool(10);
+        ExecutorService threads = Executors.newFixedThreadPool(10);
         String currentThreadId = String.valueOf(Thread.currentThread().getId());
         System.out.println("Thread in Receiver: " + currentThreadId);
         try (

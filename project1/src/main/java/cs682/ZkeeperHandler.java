@@ -83,5 +83,16 @@ public class ZkeeperHandler {
         }
     }
 
+    public List<String> getNodesNameList(){
+        List<String> children = null;
+        try {
+            children = zk.getChildren(GROUP, false);
+        } catch(KeeperException ke) {
+            System.out.println("Unable to list members of group: KeeperException ");
+        }catch(InterruptedException ie){
+            System.out.println("Unable to list members of the group: InterruptedException ");
+        }
+        return children;
+    }
 
 }

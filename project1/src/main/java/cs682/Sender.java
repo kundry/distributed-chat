@@ -34,8 +34,6 @@ public class Sender {
                 ChatMessages.Chat chatMessage = createChatMessage(receiverName, message, isBcast);
                 System.out.println("IP: " +receiverIp +" Port: "+ receiverPort + " Message: "+ chatMessage.toString());
                 System.out.println(receiverInfo.getIp());
-                //Node: hey0000000634
-                //Ip: 10.110.0.174
                 transferMessage(receiverIp, receiverPort, chatMessage);
 
             } else {
