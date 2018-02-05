@@ -1,16 +1,12 @@
 package cs682;
 
 import java.util.*;
-import org.apache.yetus.audience.InterfaceAudience;
-import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.*;
-import cs682.ChatMessages.ZKData;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
-import java.net.*;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Chat {
 
@@ -54,7 +50,7 @@ public class Chat {
         ZkeeperHandler.MEMBER_PORT = port;
         ZooKeeper zk = getZkConnection();
         ZkeeperHandler zkHandler = new ZkeeperHandler(zk);
-        //zkHandler.joinGroup();
+        zkHandler.joinGroup();
 
         //String myIP = getLocalHostIp();
         //ZKData data = createZKData(myIP,port);
@@ -119,6 +115,12 @@ public class Chat {
                                     new Sender().prepareMessage(node, bcastMessage.toString(), true);
                                 }
                             }));
+                        }
+                        bcastThreads.shutdown();
+                        try {
+                            bcastThreads.awaitTermination(90, TimeUnit.SECONDS);
+                        } catch (InterruptedException e) {
+                            System.out.println("Unable to do await Termination");
                         }
                         break;
 

@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import cs682.ChatMessages.Reply;
@@ -12,6 +14,7 @@ import cs682.ChatMessages.Reply;
 public class Receiver {
     public static final int PORT = 9007; //Fix this
     public static  boolean running = true;
+    private final List<ChatMessages.Chat> bcastHistory = new ArrayList<ChatMessages.Chat>();
 
     public void startListening(){
         ExecutorService threads = Executors.newFixedThreadPool(10);
@@ -50,12 +53,16 @@ public class Receiver {
                 if(!is_bcast) {
                     System.out.println("The following message was received: ");
                     System.out.println(message);
-                    System.out.println("by " + from);
+                    System.out.println("from: " + from);
                 } else {
-                    //broadcast
+                    addBcastToHistory(upcommingMssg);
+                    System.out.println("Printing History: ");
+                    for (ChatMessages.Chat mssg: bcastHistory) {
+                        System.out.println(mssg.getMessage());
+                        System.out.println(mssg.getFrom());
+                    }
                 }
 
-                // send reply Fix Parameters and create a method
                 Reply reply = createReply(200,"OK");
                 reply.writeDelimitedTo(outstream);
                 connectionSock.close();
@@ -64,6 +71,8 @@ public class Receiver {
                 System.out.println("Unable to communicate with the sender" + ie);
             }
         }
+
+
         public  Reply createReply(int status, String message) {
             Reply reply = Reply.newBuilder()
                     .setStatus(status)
@@ -72,6 +81,8 @@ public class Receiver {
             return reply;
         }
     }
-
+    private synchronized void addBcastToHistory(ChatMessages.Chat message){
+        bcastHistory.add(message);
+    }
 
 }

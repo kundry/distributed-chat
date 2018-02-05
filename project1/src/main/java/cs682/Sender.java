@@ -33,7 +33,7 @@ public class Sender {
                 int receiverPort = Integer.parseInt(receiverInfo.getPort());
                 ChatMessages.Chat chatMessage = createChatMessage(receiverName, message, isBcast);
                 System.out.println("IP: " +receiverIp +" Port: "+ receiverPort + " Message: "+ chatMessage.toString());
-                System.out.println(receiverInfo.getIp());
+                //System.out.println(receiverInfo.getIp());
                 transferMessage(receiverIp, receiverPort, chatMessage);
 
             } else {
