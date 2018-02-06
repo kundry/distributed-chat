@@ -9,9 +9,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Chat {
-    public static final int PORT = 9000;
-    public static final String HOST = "localhost";
-    private static final ArrayList<String> CHAT_COMMANDS = new ArrayList<String>();
+    public static final int PORT = 9000; //2181
+    public static final String HOST = "localhost"; //mc01
+    private static final ArrayList<String> CHAT_COMMANDS = new ArrayList<>();
     private static boolean RUNNING = true;
 
     public static void main(String[] args) {
@@ -19,6 +19,7 @@ public class Chat {
         CHAT_COMMANDS.add("list");
         CHAT_COMMANDS.add("send");
         CHAT_COMMANDS.add("sendAll");
+        CHAT_COMMANDS.add("showHistory");
         CHAT_COMMANDS.add("help");
         CHAT_COMMANDS.add("exit");
 
@@ -47,7 +48,7 @@ public class Chat {
         //Registering
         ZooKeeper zk = getZkConnection();
         ZkeeperHandler zkHandler = new ZkeeperHandler(zk);
-        //zkHandler.joinGroup();
+        zkHandler.joinGroup();
 
         // UI
         System.out.println("Welcome to Chat Peer!");
@@ -63,7 +64,7 @@ public class Chat {
             command = fullCommandSplit[0];
 
             if (!CHAT_COMMANDS.contains(command)) {
-                System.out.println("Command not found!");
+                System.out.println("Command not found! Check right syntax. Type help");
             } else {
                 switch (command) {
                     case "list":
@@ -73,11 +74,12 @@ public class Chat {
                         sendOneMessage(fullCommandSplit);
                         break;
                     case "sendAll":
-                        //List<String> nodesNamesList = zkHandler.getNodesNameList();
-                        List<String> nodesNamesList = new ArrayList<>();
-                        nodesNamesList.add("latte0000000704");
-                        nodesNamesList.add("chai0000000724");
+                        List<String> nodesNamesList = zkHandler.getNodesNameList();
                         sendBcastMessage(fullCommandSplit , nodesNamesList);
+                        break;
+                    case "showHistory":
+                        Receiver receiver = new Receiver();
+                        receiver.listBcastMessages();
                         break;
                     case "exit":
                         System.out.println("Exiting ....");

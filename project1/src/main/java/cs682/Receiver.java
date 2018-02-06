@@ -5,20 +5,21 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import cs682.ChatMessages.Reply;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Receiver {
-    public static  boolean running = true;
-    private final List<ChatMessages.Chat> bcastHistory = new ArrayList<ChatMessages.Chat>();
+    //Data Structure found on: https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html
+    private static CopyOnWriteArrayList<ChatMessages.Chat> bcastHistory = new CopyOnWriteArrayList<>();
+
 
     public void startListening(String port){
+        boolean running = true;
         ExecutorService threads = Executors.newFixedThreadPool(10);
-        String currentThreadId = String.valueOf(Thread.currentThread().getId());
-        System.out.println("Thread in Receiver: " + currentThreadId);
+        //String currentThreadId = String.valueOf(Thread.currentThread().getId());
+        //System.out.println("Thread in Receiver: " + currentThreadId);
         try (
                 ServerSocket receiverServer = new ServerSocket(Integer.parseInt(port))
         ){
@@ -53,11 +54,6 @@ public class Receiver {
                     System.out.println("from: " + from);
                 } else {
                     addBcastToHistory(upcommingMssg);
-                    System.out.println("Printing History: ");
-                    for (ChatMessages.Chat mssg: bcastHistory) {
-                        System.out.println(mssg.getMessage());
-                        System.out.println(mssg.getFrom());
-                    }
                 }
                 Reply reply = createReply(200,"OK");
                 reply.writeDelimitedTo(outstream);
@@ -68,7 +64,7 @@ public class Receiver {
         }
 
 
-        public  Reply createReply(int status, String message) {
+        private  Reply createReply(int status, String message) {
             Reply reply = Reply.newBuilder()
                     .setStatus(status)
                     .setMessage(message)
@@ -76,8 +72,17 @@ public class Receiver {
             return reply;
         }
     }
-    private synchronized void addBcastToHistory(ChatMessages.Chat message){
-        bcastHistory.add(message);
+
+    private  void addBcastToHistory(ChatMessages.Chat message){
+            bcastHistory.add(message);
     }
 
+    public  void listBcastMessages(){
+        System.out.println("Printing History: ");
+        for (ChatMessages.Chat mssg: bcastHistory) {
+            System.out.println(mssg.getMessage());
+            System.out.println(mssg.getFrom());
+            System.out.println("-------------------------------");
+        }
+    }
 }

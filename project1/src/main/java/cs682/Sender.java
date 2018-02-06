@@ -17,10 +17,10 @@ public class Sender {
     public void prepareMessage( String receiverName, String message, boolean isBcast){
         String group = ZkeeperHandler.GROUP;
         String member = ZkeeperHandler.MEMBER;
-        String currentThreadId = String.valueOf(Thread.currentThread().getId());
         System.out.println("Finding receiver info");
-        System.out.println(receiverName +" / " + message + " / " + group);
-        System.out.println("Thread in Sender Finding Info: " + currentThreadId);
+        System.out.println(receiverName +" - " + message + " - " + group);
+        //String currentThreadId = String.valueOf(Thread.currentThread().getId());
+        //System.out.println("Thread in Sender Finding Info: " + currentThreadId);
         ZooKeeper zk = Chat.getZkConnection();
         try {
             Stat s = new Stat();

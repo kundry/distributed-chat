@@ -13,7 +13,7 @@ import org.apache.zookeeper.data.Stat;
 
 public class ZkeeperHandler {
 
-    public static final  String GROUP = "/CS682_Test";  // "/zkdemo"
+    public static final  String GROUP = "/CS682_Test";  // "/zkdemo" or "CS682_Test" "CS682_Chat"
     public static String MEMBER;
     public static String MEMBER_PORT;
     private static ZooKeeper zk;
@@ -31,7 +31,7 @@ public class ZkeeperHandler {
             String createdPath = zk.create(GROUP + MEMBER,
                     data.toByteArray(),  //ip and port
                     ZooDefs.Ids.OPEN_ACL_UNSAFE,
-                    CreateMode.PERSISTENT_SEQUENTIAL);
+                    CreateMode.EPHEMERAL_SEQUENTIAL);
             System.out.println("Joined group " + GROUP + MEMBER);
             System.out.println("Created Path " + createdPath);
 
