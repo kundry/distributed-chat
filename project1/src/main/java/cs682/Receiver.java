@@ -73,7 +73,7 @@ public class Receiver {
         }
     }
 
-    private  void addBcastToHistory(ChatMessages.Chat message){
+    private void addBcastToHistory(ChatMessages.Chat message){
             bcastHistory.add(message);
     }
 
