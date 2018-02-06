@@ -9,8 +9,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Chat {
-    public static final int PORT = 9000; //2181
-    public static final String HOST = "localhost"; //mc01
+    public static final int PORT = 2181; //2181
+    public static final String HOST = "mc01"; //mc01
     private static final ArrayList<String> CHAT_COMMANDS = new ArrayList<>();
     private static boolean RUNNING = true;
 
