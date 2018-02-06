@@ -9,8 +9,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Chat {
-    public static final int PORT = 2181; //2181
-    public static final String HOST = "mc01"; //mc01
+    public static final int PORT = 2181; //2181 9000
+    public static final String HOST = "mc01"; //mc01 localhost
     private static final ArrayList<String> CHAT_COMMANDS = new ArrayList<>();
     private static boolean RUNNING = true;
 
@@ -26,14 +26,19 @@ public class Chat {
         //Getting args
         String member = "";
         String port = "";
-        if(!args[0].equals("-user") || !args[2].equals("-port") ){
-            System.out.println("Invalid execution arguments");
-        } else {
-          member = "/" + args[1];
-          port = args[3];
-          System.out.println("Member: " + member);
-          System.out.println("Port: " + port);
+
+        for (int i= 0; i< args.length; i++){
+            if(args[i].equals("-user")){
+                member = "/" + args[i+1];
+            }
+            else if (args[i].equals("-port")){
+                    port = args[i+1];
+                }
         }
+
+        System.out.println("Member: " + member);
+        System.out.println("Port: " + port);
+
         ZkeeperHandler.MEMBER = member;
         ZkeeperHandler.MEMBER_PORT = port;
 
