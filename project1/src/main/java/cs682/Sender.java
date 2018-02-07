@@ -17,8 +17,9 @@ public class Sender {
     public void prepareMessage( String receiverName, String message, boolean isBcast){
         String group = ZkeeperHandler.GROUP;
         String member = ZkeeperHandler.MEMBER;
-        System.out.println("Finding receiver info");
-        System.out.println(receiverName +" - " + message + " - " + group);
+        //ZooKeeper zk = ZkeeperHandler.zk;
+        //System.out.println("Finding receiver info");
+        //System.out.println(receiverName +" - " + message + " - " + group);
         //String currentThreadId = String.valueOf(Thread.currentThread().getId());
         //System.out.println("Thread in Sender Finding Info: " + currentThreadId);
         ZooKeeper zk = Chat.getZkConnection();
@@ -30,7 +31,7 @@ public class Sender {
                 InetAddress receiverIp = InetAddress.getByName(receiverInfo.getIp());
                 int receiverPort = Integer.parseInt(receiverInfo.getPort());
                 ChatMessages.Chat chatMessage = createChatMessage(member, message, isBcast);
-                System.out.println("IP: " +receiverIp +" Port: "+ receiverPort + " Message: "+ chatMessage.toString());
+                System.out.println("Ready to transfer message to " + receiverName + " broadcast: " + isBcast);
                 transferMessage(receiverIp, receiverPort, chatMessage);
             } else {
                 System.out.println("Receiver not found");
@@ -65,9 +66,11 @@ public class Sender {
             Reply receiverReply = Reply.getDefaultInstance();
             receiverReply = receiverReply.parseDelimitedFrom(inStream);
             System.out.println("Reply: " + receiverReply);
+            //senderSock.getInputStream();
+            senderSock.close();
 
         }catch(IOException io){
-            System.out.println("Unable to transfer the message" + io);
+            System.out.println("Unable to transfer the message to " + ip);
         }
     }
 

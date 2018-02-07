@@ -9,10 +9,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Chat {
-    public static final int PORT = 2181; //2181 9000
-    public static final String HOST = "mc01"; //mc01 localhost
+    public static final int PORT = 9000; //2181 9000
+    public static final String HOST = "localhost"; //mc01 localhost
     private static final ArrayList<String> CHAT_COMMANDS = new ArrayList<>();
     private static boolean RUNNING = true;
+    private static ExecutorService bcastThreads = Executors.newFixedThreadPool(20);
 
     public static void main(String[] args) {
         //Setting available commands
@@ -38,15 +39,16 @@ public class Chat {
 
         System.out.println("Member: " + member);
         System.out.println("Port: " + port);
-
         ZkeeperHandler.MEMBER = member;
         ZkeeperHandler.MEMBER_PORT = port;
 
+
         //Start Listening
+        Receiver receiverInit = new Receiver();
         new Thread(new Runnable() {
             @Override
             public void run() {
-                new Receiver().startListening(ZkeeperHandler.MEMBER_PORT);
+                receiverInit.startListening(ZkeeperHandler.MEMBER_PORT);
             }
         }).start();
 
@@ -86,13 +88,15 @@ public class Chat {
                         Receiver receiver = new Receiver();
                         receiver.listBcastMessages();
                         break;
+                    case "help":
+                        showCommandsHelp();
+                        break;
                     case "exit":
                         System.out.println("Exiting ....");
                         RUNNING = false;
-                        System.exit(0);
-                        break;
-                    case "help":
-                        showCommandsHelp();
+                        shutdownSender();
+                        receiverInit.shutdownReceiver();
+                        //System.exit(0);
                         break;
                     default:
                         break;
@@ -149,7 +153,6 @@ public class Chat {
                 bcastMessage.append(" ").append(arguments[i]);
             }
         }
-        ExecutorService bcastThreads = Executors.newFixedThreadPool(20);
 
         for(String node: nodesNamesList){
             bcastThreads.submit(new Thread(new Runnable() {
@@ -159,20 +162,26 @@ public class Chat {
                 }
             }));
         }
+
+    }
+
+    private static void showCommandsHelp(){
+        System.out.println("list");
+        System.out.println("send <name> <message>");
+        System.out.println("sendAll <message>");
+        System.out.println("help");
+        System.out.println("exit");
+    }
+
+    private static void shutdownSender(){
+        System.out.println("Shuting down the Sender ...");
         bcastThreads.shutdown();
         try {
-            bcastThreads.awaitTermination(90, TimeUnit.SECONDS);
+            bcastThreads.awaitTermination(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             System.out.println("Unable to do await Termination");
         }
     }
 
-    private static void showCommandsHelp(){
-        System.out.println("list");
-        System.out.println("send [name] [message]");
-        System.out.println("sendAll [message]");
-        System.out.println("help");
-        System.out.println("exit");
-    }
 
 }//Chat

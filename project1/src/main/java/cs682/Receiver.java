@@ -9,27 +9,41 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import cs682.ChatMessages.Reply;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class Receiver {
     //Data Structure found on: https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html
     private static CopyOnWriteArrayList<ChatMessages.Chat> bcastHistory = new CopyOnWriteArrayList<>();
+    private static ExecutorService receivingThreads = Executors.newFixedThreadPool(20);
+    private static ServerSocket receiverServer;
+    private volatile boolean running;
 
 
     public void startListening(String port){
-        boolean running = true;
-        ExecutorService threads = Executors.newFixedThreadPool(10);
         //String currentThreadId = String.valueOf(Thread.currentThread().getId());
         //System.out.println("Thread in Receiver: " + currentThreadId);
-        try (
-                ServerSocket receiverServer = new ServerSocket(Integer.parseInt(port))
-        ){
+        running = true;
+        try {
+            receiverServer = new ServerSocket(Integer.parseInt(port));
             while(running){
                 Socket receiverSock = receiverServer.accept();
-                threads.submit(new ReceiverWorker(receiverSock));
+                receivingThreads.submit(new ReceiverWorker(receiverSock));
             }
-        } catch(IOException ie) {
-            System.out.println("Unable to open the socket " + ie);
+
+        }catch (IOException ie){
+            System.out.println("Unable to create Server Socket " + ie);
         }
+
+//        try (
+//                ServerSocket  receiverServer = new ServerSocket(Integer.parseInt(port));
+//        ){
+//            while(running){
+//                Socket receiverSock = receiverServer.accept();
+//                receivingThreads.submit(new ReceiverWorker(receiverSock));
+//            }
+//        } catch(IOException ie) {
+//            System.out.println("Unable to open the socket " + ie);
+//        }
     }
 
     public class ReceiverWorker implements Runnable {
@@ -53,16 +67,18 @@ public class Receiver {
                     System.out.println(message);
                     System.out.println("from: " + from);
                 } else {
+                    System.out.println("The following broadcast message was received: ");
+                    System.out.println(message);
+                    System.out.println("from: " + from);
                     addBcastToHistory(upcommingMssg);
                 }
                 Reply reply = createReply(200,"OK");
                 reply.writeDelimitedTo(outstream);
                 connectionSock.close();
             }catch(IOException ie){
-                System.out.println("Unable to communicate with the sender" + ie);
+                System.out.println("Unable to communicate. The sender went off!" + ie);
             }
         }
-
 
         private  Reply createReply(int status, String message) {
             Reply reply = Reply.newBuilder()
@@ -83,6 +99,20 @@ public class Receiver {
             System.out.println(mssg.getMessage());
             System.out.println(mssg.getFrom());
             System.out.println("-------------------------------");
+        }
+    }
+
+    public void shutdownReceiver(){
+        System.out.println("Shuting down the Receiver ...");
+        running = false;
+        receivingThreads.shutdown();
+        try {
+            receivingThreads.awaitTermination(30, TimeUnit.SECONDS);
+            receiverServer.close();
+        } catch(InterruptedException ie){
+            System.out.println("Await Termination Exception " + ie);
+        } catch (IOException ioe) {
+            System.out.println("ServerSocket close Exception " + ioe);
         }
     }
 }
