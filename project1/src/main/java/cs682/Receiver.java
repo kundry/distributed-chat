@@ -14,18 +14,16 @@ import java.util.concurrent.TimeUnit;
 public class Receiver {
     //Data Structure found on: https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html
     private static CopyOnWriteArrayList<ChatMessages.Chat> bcastHistory = new CopyOnWriteArrayList<>();
-    private static ExecutorService receivingThreads = Executors.newFixedThreadPool(20);
+    private static ExecutorService receivingThreads = Executors.newFixedThreadPool(30);
     private static ServerSocket receiverServer;
     private volatile boolean running;
 
 
     public void startListening(String port){
-        //String currentThreadId = String.valueOf(Thread.currentThread().getId());
-        //System.out.println("Thread in Receiver: " + currentThreadId);
         running = true;
         try {
             receiverServer = new ServerSocket(Integer.parseInt(port));
-            while(running){
+            while (running) {
                 Socket receiverSock = receiverServer.accept();
                 receivingThreads.submit(new ReceiverWorker(receiverSock));
             }

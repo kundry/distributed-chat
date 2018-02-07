@@ -9,11 +9,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Chat {
-    public static final int PORT = 9000; //2181 9000
-    public static final String HOST = "localhost"; //mc01 localhost
+    public static final int PORT = 2181; //2181 9000
+    public static final String HOST = "mc01"; //mc01 localhost
     private static final ArrayList<String> CHAT_COMMANDS = new ArrayList<>();
     private static boolean RUNNING = true;
-    private static ExecutorService bcastThreads = Executors.newFixedThreadPool(20);
+    private static ExecutorService bcastThreads = Executors.newFixedThreadPool(30);
 
     public static void main(String[] args) {
         //Setting available commands
@@ -54,7 +54,8 @@ public class Chat {
 
         //Registering
         ZooKeeper zk = getZkConnection();
-        ZkeeperHandler zkHandler = new ZkeeperHandler(zk);
+        ZkeeperHandler.zk = zk;
+        ZkeeperHandler zkHandler = new ZkeeperHandler();
         zkHandler.joinGroup();
 
         // UI
@@ -177,7 +178,7 @@ public class Chat {
         System.out.println("Shuting down the Sender ...");
         bcastThreads.shutdown();
         try {
-            bcastThreads.awaitTermination(30, TimeUnit.SECONDS);
+            bcastThreads.awaitTermination(60, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             System.out.println("Unable to do await Termination");
         }

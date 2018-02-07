@@ -17,12 +17,8 @@ public class Sender {
     public void prepareMessage( String receiverName, String message, boolean isBcast){
         String group = ZkeeperHandler.GROUP;
         String member = ZkeeperHandler.MEMBER;
-        //ZooKeeper zk = ZkeeperHandler.zk;
-        //System.out.println("Finding receiver info");
-        //System.out.println(receiverName +" - " + message + " - " + group);
-        //String currentThreadId = String.valueOf(Thread.currentThread().getId());
-        //System.out.println("Thread in Sender Finding Info: " + currentThreadId);
-        ZooKeeper zk = Chat.getZkConnection();
+        ZooKeeper zk = ZkeeperHandler.zk;
+        //ZooKeeper zk = Chat.getZkConnection();
         try {
             Stat s = new Stat();
             byte[] raw = zk.getData(group + "/" + receiverName, false, s);
@@ -66,8 +62,8 @@ public class Sender {
             Reply receiverReply = Reply.getDefaultInstance();
             receiverReply = receiverReply.parseDelimitedFrom(inStream);
             System.out.println("Reply: " + receiverReply);
-            //senderSock.getInputStream();
-            senderSock.close();
+            senderSock.getInputStream();
+            //senderSock.close();
 
         }catch(IOException io){
             System.out.println("Unable to transfer the message to " + ip);

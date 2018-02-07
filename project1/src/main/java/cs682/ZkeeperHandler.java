@@ -13,15 +13,11 @@ import org.apache.zookeeper.data.Stat;
 
 public class ZkeeperHandler {
 
-    public static final  String GROUP = "/CS682_Test";  // "/zkdemo" or "CS682_Test" "CS682_Chat"
+    public static final  String GROUP = "/CS682_Chat";  // "/zkdemo" or "CS682_Test" "CS682_Chat"
     public static String MEMBER;
     public static String MEMBER_PORT;
     public static ZooKeeper zk;
 
-    //constructor
-    public ZkeeperHandler( ZooKeeper zk){
-        this.zk = zk;
-    }
 
     //ZooKeeper API
     public  void joinGroup(){
