@@ -31,17 +31,6 @@ public class Receiver {
         }catch (IOException ie){
             System.out.println("Unable to create Server Socket " + ie);
         }
-
-//        try (
-//                ServerSocket  receiverServer = new ServerSocket(Integer.parseInt(port));
-//        ){
-//            while(running){
-//                Socket receiverSock = receiverServer.accept();
-//                receivingThreads.submit(new ReceiverWorker(receiverSock));
-//            }
-//        } catch(IOException ie) {
-//            System.out.println("Unable to open the socket " + ie);
-//        }
     }
 
     public class ReceiverWorker implements Runnable {
